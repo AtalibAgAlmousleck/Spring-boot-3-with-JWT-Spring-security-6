@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/f_auth
+    username: postgres
+    password: Admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+# Json Web Token Secret
+application:
+  security:
+    jwt:
+      secret-key: 2547883401d214dcc7ed60d6cfb100f16f5e69be1ad2b17db67f129cbeac1a8a
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
