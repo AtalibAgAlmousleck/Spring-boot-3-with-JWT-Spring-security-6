@@ -1,5 +1,8 @@
-package com.atalibdev.authentication;
+package com.atalibdev.controller;
 
+import com.atalibdev.request.AuthenticationRequest;
+import com.atalibdev.request.AuthenticationResponse;
+import com.atalibdev.request.RegistrationRequest;
 import com.atalibdev.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

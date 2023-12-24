@@ -1,7 +1,6 @@
 package com.atalibdev;
 
-import com.atalibdev.authentication.RegistrationRequest;
-import com.atalibdev.entities.Role;
+import com.atalibdev.request.RegistrationRequest;
 import com.atalibdev.service.AuthenticationService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

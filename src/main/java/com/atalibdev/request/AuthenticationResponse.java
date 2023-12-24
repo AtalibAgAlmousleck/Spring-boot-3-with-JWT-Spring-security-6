@@ -1,4 +1,4 @@
-package com.atalibdev.authentication;
+package com.atalibdev.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

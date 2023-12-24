@@ -1,4 +1,4 @@
-package com.atalibdev.authentication;
+package com.atalibdev.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

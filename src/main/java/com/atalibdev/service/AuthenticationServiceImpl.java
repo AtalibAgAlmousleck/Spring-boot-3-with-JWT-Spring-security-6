@@ -1,9 +1,8 @@
 package com.atalibdev.service;
 
-import com.atalibdev.authentication.AuthenticationRequest;
-import com.atalibdev.authentication.AuthenticationResponse;
-import com.atalibdev.authentication.RegistrationRequest;
-import com.atalibdev.entities.Role;
+import com.atalibdev.request.AuthenticationRequest;
+import com.atalibdev.request.AuthenticationResponse;
+import com.atalibdev.request.RegistrationRequest;
 import com.atalibdev.entities.User;
 import com.atalibdev.jwt.JwtService;
 import com.atalibdev.repository.UserRepository;
