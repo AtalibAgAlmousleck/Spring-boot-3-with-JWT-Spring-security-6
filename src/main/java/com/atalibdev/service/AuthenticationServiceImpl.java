@@ -6,15 +6,19 @@ import com.atalibdev.request.RegistrationRequest;
 import com.atalibdev.entities.User;
 import com.atalibdev.jwt.JwtService;
 import com.atalibdev.repository.UserRepository;
+import com.atalibdev.request.VerificationRequest;
+import com.atalibdev.tfa.TwoFactorAuthenticationService;
 import com.atalibdev.token.Token;
 import com.atalibdev.token.TokenRepository;
 import com.atalibdev.token.TokenType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 
     @Override
     public AuthenticationResponse register(RegistrationRequest request) {
@@ -39,14 +44,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .tfEnabled(request.isTfEnabled())
                 .build();
+
+        //todo: if TFA enable then generate a secret
+        if (request.isTfEnabled())
+            user.setSecret(twoFactorAuthenticationService.generateTheNewSecrete());
         var savedUser = userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateFreshToken(user);
         userToken(savedUser, jwtToken); // saveUserToken
         return AuthenticationResponse.builder()
+                .secretImageUrl(twoFactorAuthenticationService
+                        .generateQRCodeImageUrl(user.getSecret()))
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .tfEnabled(user.isTfEnabled())
                 .build();
     }
 
@@ -58,6 +71,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
+        //todo enable tfa
+        if (user.isTfEnabled()) {
+            return AuthenticationResponse.builder()
+                    .accessToken("")
+                    .refreshToken("")
+                    .tfEnabled(true)
+                    .build();
+        }
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateFreshToken(user);
         userWithOneToken(user); // revoke token
@@ -65,6 +86,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .tfEnabled(false)
                 .build();
     }
 
@@ -87,11 +109,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 var authResponse = AuthenticationResponse.builder()
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
+                        .tfEnabled(false)
                         .build();
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }
 
+    }
+
+    @Override
+    public AuthenticationResponse verifyCode(VerificationRequest verificationRequest) {
+        User user = userRepository.findByEmail(verificationRequest.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("User not found %s", verificationRequest.getEmail())
+                ));
+        if (twoFactorAuthenticationService.isOptNotValid(user.getSecret(), verificationRequest.getCode()))
+            throw new BadCredentialsException("Code is not correct");
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .tfEnabled(user.isTfEnabled())
+                .build();
     }
 
     private void userWithOneToken(User user) {

@@ -16,4 +16,5 @@ public class RegistrationRequest {
     private String email;
     private String password;
     private Role role;
+    private boolean tfEnabled;
 }

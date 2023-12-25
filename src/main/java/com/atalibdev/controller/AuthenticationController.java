@@ -3,15 +3,13 @@ package com.atalibdev.controller;
 import com.atalibdev.request.AuthenticationRequest;
 import com.atalibdev.request.AuthenticationResponse;
 import com.atalibdev.request.RegistrationRequest;
+import com.atalibdev.request.VerificationRequest;
 import com.atalibdev.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -23,8 +21,11 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> registration(@RequestBody RegistrationRequest request) {
-        return ResponseEntity.ok(authenticationService.register(request));
+    public ResponseEntity<?> registration(@RequestBody RegistrationRequest request) {
+        var response = authenticationService.register(request);
+        if (request.isTfEnabled())
+            return ResponseEntity.ok(response);
+        return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/login")
@@ -36,4 +37,11 @@ public class AuthenticationController {
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         authenticationService.refreshToken(request, response);
     }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyCode(@RequestBody VerificationRequest verificationRequest) {
+        return ResponseEntity.ok(authenticationService.verifyCode(verificationRequest));
+    }
+
+
 }

@@ -1,6 +1,6 @@
 package com.atalibdev.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class AuthenticationResponse {
-    @JsonProperty("access_token")
     private String accessToken;
-    @JsonProperty("refresh_token")
     private String refreshToken;
+    private boolean tfEnabled;
+    private String secretImageUrl;
 }
