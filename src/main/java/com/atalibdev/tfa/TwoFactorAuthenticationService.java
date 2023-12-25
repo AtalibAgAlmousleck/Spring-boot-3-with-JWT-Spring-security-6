@@ -44,7 +44,6 @@ public class TwoFactorAuthenticationService {
         CodeVerifier codeVerifier = new DefaultCodeVerifier(codeGenerator, provider);
         return codeVerifier.isValidCode(secret, code);
     }
-
     public boolean isOptNotValid(String secret, String code) {
         return !this.isOtpValid(secret, code);
     }

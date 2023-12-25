@@ -38,7 +38,7 @@ public class AuthenticationController {
         authenticationService.refreshToken(request, response);
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody VerificationRequest verificationRequest) {
         return ResponseEntity.ok(authenticationService.verifyCode(verificationRequest));
     }
